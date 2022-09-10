@@ -24,5 +24,4 @@ public class Tile {
         return land;
     }
 
-
 }
