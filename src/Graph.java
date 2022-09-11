@@ -1,12 +1,12 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Graph {
     final int SIZE = 5;
     private int row;
     private int col;
     private Tile[][] lake;
+
+    private boolean initialized = false;
 
     //Constructor
     public Graph(int row, int col) {
@@ -84,10 +84,11 @@ public class Graph {
         for(int i = 0; i < row; i++) {
             for(int j = 0; j < col; j++) {
                 if(lake[i][j].isLand()) {
-                    lake[i][j].setLand();
+                    lake[i][j].setWater();
                 }
             }
         }
+        initialized = false;
     }
 
     //Randomly generates a continuous path in the lake.
@@ -124,18 +125,18 @@ public class Graph {
         }
         int[] ent = list.get(rand.nextInt(list.size()));
         lake[ent[0]][ent[1]].setEntrance();
-
+        initialized = true;
 
     }
 
     //Checks if there are open adjacent tiles, then returns one randomly. Returns
-    //[-1, -1] if no adjacent tiles
+    //[-1, -1] if not an adjacent tiles
     private int[] openAdjacents(int r, int c) {
         int[] a = {-1, 1};
         List<int[]> list = new ArrayList<>();
-        for(int i = 0; i < a.length; i++) {
-            int[] row = {r + a[i], c};
-            int[] col = {r, a[i] + c};
+        for (int j : a) {
+            int[] row = {r + j, c};
+            int[] col = {r, j + c};
             list.add(row);
             list.add(col);
         }
@@ -145,12 +146,73 @@ public class Graph {
                 test[1] = -1;
             }
         }
-        if(list.isEmpty()) {
-            int[] fail = {-1, -1};
-            return fail;
-        } else {
-            Random rand = new Random();
-            return list.get(rand.nextInt(list.size()));
+
+        Random rand = new Random();
+        return list.get(rand.nextInt(list.size()));
+
+    }
+
+
+    //Solve applies an optimized arrangement of pathing of tiles
+    //We allow at most 2 swap tiles. It can be assumed the player will
+    //place the entrance at the most optimal location.
+    public void solve() {
+        if(!initialized) {
+            return;
         }
+        int[][] distances = new int[this.row][this.col];
+        int entRow = 0;
+        int entCol = 0;
+        for(int i = 0; i < row; i++) {
+            for(int j = 0; j < col; j++) {
+                if(lake[i][j].isEntrance()) {
+                    entRow = i;
+                    entCol = j;
+                }
+            }
+        } //Find current entrance.
+        for(int i = 0; i < row; i++) {
+            for(int j = 0; j < col; j++) {
+                distances[i][j] = -1;
+            }
+        } //Initialize all distances as -1
+
+        distances[entRow][entCol] = 0;
+        manhattan(distances, entRow, entCol);
+        //FInd furthest from entrance
+        //Find furthest from furthest
+        //
+        for(int i = 0; i < distances.length; i++) {
+            for(int j = 0; j < distances[0].length; j++) {
+                if(distances[i][j] == -1 || distances[i][j] > 9) {
+                    System.out.print(distances[i][j] + " ");
+                } else {
+                    System.out.print(" " + distances[i][j] + " ");
+                }
+
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    //Calculates the manhattan distance of all tiles from entrance.
+    private int manhattan(int[][] distances, int entRow, int entCol) {
+        int max = 0;
+        //System.out.println(r + " " + c);
+        for(int i = 0; i < this.row; i++) {
+            for(int j = 0; j < this.col; j++) {
+                if(lake[i][j].isLand()) {
+                    distances[i][j] = Math.abs(entRow - i) + Math.abs(entCol - j);
+                    if(max < distances[i][j]) {
+                        max = distances[i][j];
+                    }
+                }
+
+            }
+        }
+
+        return max;
+
     }
 }

@@ -11,5 +11,6 @@ public class Main {
         graph.view();
         graph.random();
         graph.view();
+        graph.solve();
     }
 }
