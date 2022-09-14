@@ -5,8 +5,10 @@ public class Graph {
     private int row;
     private int col;
     private Tile[][] lake;
-
     private boolean initialized = false;
+
+    private static int dRow[] = {-1, 0, 1, 0};
+    private static int dCol[] = {0, 1, 0, -1};
 
     //Constructor
     public Graph(int row, int col) {
@@ -171,17 +173,85 @@ public class Graph {
                 }
             }
         } //Find current entrance.
-        for(int i = 0; i < row; i++) {
-            for(int j = 0; j < col; j++) {
-                distances[i][j] = -1;
-            }
-        } //Initialize all distances as -1
 
-        distances[entRow][entCol] = 0;
-        manhattan(distances, entRow, entCol);
-        //FInd furthest from entrance
+
+        initializeDisplay(distances);
+        int max = calculateReward(distances, entRow, entCol);
+        Set<int[]> furthest = new HashSet<>();
+        for(int i = 0; i < this.row; i++) {//We get the set of coords of the farthest tile(s) from entrance.
+            for(int j = 0; j < this.col; j++) {
+                if(distances[i][j] == max) {
+                    int[] coord = {i, j};
+                    furthest.add(coord);
+                }
+
+            }
+        }
+        System.out.println("furthest set size: " + furthest.size());
+        /*
+        if(furthest.size() >= 1) {
+            distancesDisplay(distances);
+        }
+
+         */
         //Find furthest from furthest
         //
+    }
+
+    //Calculates the distance of all tiles from entrance.
+    private int calculateReward(int[][] distances, int entRow, int entCol) {
+        int max = 0;
+        int d = 0;
+        Queue<int[]> q = new LinkedList<>();
+        int[] first = {entRow, entCol};
+        q.add(first);
+        distances[entRow][entCol] = d;
+
+        while(!q.isEmpty()) {
+            int[] coords = q.poll();
+            int row = coords[0];
+            int col = coords[1];
+            d = distances[row][col] + 1;
+            for(int i = 0; i < 4; i++) {
+                int newRow = row + dRow[i];
+                int newCol = col + dCol[i];
+
+                if(isValid(distances, newRow, newCol)) {
+
+                    int[] newCoords = {newRow, newCol};
+                    q.add(newCoords);
+                    distances[newRow][newCol] = d;
+                    if(d > max) {
+                        max = d;
+                    }
+                }
+            }
+
+        }
+        distancesDisplay(distances);
+        return max;
+    }
+
+    //Checks if a tile is an appropriate one for applying distance to from an entrance tile
+    private boolean isValid(int[][] distances, int row, int col) {
+        if(row < 0 || col < 0 || row >= this.row || col >= this.col) {
+
+            return false;
+        }
+        if(distances[row][col] != -1) {
+
+            return false;
+        }
+        if(!lake[row][col].isLand()) {
+
+            return false;
+        }
+        return true;
+    }
+
+
+    //Displays the distances array
+    private void distancesDisplay(int[][] distances) {
         for(int i = 0; i < distances.length; i++) {
             for(int j = 0; j < distances[0].length; j++) {
                 if(distances[i][j] == -1 || distances[i][j] > 9) {
@@ -196,23 +266,12 @@ public class Graph {
         System.out.println();
     }
 
-    //Calculates the manhattan distance of all tiles from entrance.
-    private int manhattan(int[][] distances, int entRow, int entCol) {
-        int max = 0;
-        //System.out.println(r + " " + c);
-        for(int i = 0; i < this.row; i++) {
-            for(int j = 0; j < this.col; j++) {
-                if(lake[i][j].isLand()) {
-                    distances[i][j] = Math.abs(entRow - i) + Math.abs(entCol - j);
-                    if(max < distances[i][j]) {
-                        max = distances[i][j];
-                    }
-                }
-
+    //Sets all tile distances to -1
+    private void initializeDisplay(int[][] distances) {
+        for(int i = 0; i < row; i++) {
+            for(int j = 0; j < col; j++) {
+                distances[i][j] = -1;
             }
         }
-
-        return max;
-
     }
 }
