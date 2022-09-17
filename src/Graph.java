@@ -6,6 +6,7 @@ public class Graph {
     private int col;
     private Tile[][] lake;
     private boolean initialized = false;
+    private int landTiles;
 
     private static int dRow[] = {-1, 0, 1, 0};
     private static int dCol[] = {0, 1, 0, -1};
@@ -20,6 +21,7 @@ public class Graph {
                 lake[i][j] = new Tile();
             }
         }
+        landTiles = 0;
     }
 
     //Default constructor
@@ -39,7 +41,9 @@ public class Graph {
         if(this.row > row && this.col > col && row > -1 && col > -1) {
             lake[row][col] = new Tile();
             lake[row][col].setLand();
+            landTiles++;
         }
+
     }
 
     //Sets a tile to be the entrance
@@ -91,6 +95,7 @@ public class Graph {
             }
         }
         initialized = false;
+        landTiles = 0;
     }
 
     //Randomly generates a continuous path in the lake.
@@ -103,7 +108,7 @@ public class Graph {
         } else  {
             tiles = rand.nextInt(10, 15);
         }
-
+        landTiles = tiles;
         List<int[]> list = new ArrayList<>();
         int[] first = {rand.nextInt(0, row), rand.nextInt(0, col)};
         list.add(first);
@@ -188,13 +193,22 @@ public class Graph {
             }
         }
         System.out.println("furthest set size: " + furthest.size());
-        /*
-        if(furthest.size() >= 1) {
-            distancesDisplay(distances);
-        }
 
-         */
-        //Find furthest from furthest
+        int[] actualFurthest = {entRow, entCol};
+        for(int[] coords: furthest) {
+            initializeDisplay(distances);
+            int compareMax = calculateReward(distances, coords[0], coords[1]);
+            if(compareMax > max) {
+                actualFurthest[0] = coords[0];
+                actualFurthest[1] = coords[1];
+                max = compareMax;
+            }
+        }
+        initializeDisplay(distances);
+        calculateReward(distances, actualFurthest[0], actualFurthest[1]);
+        distancesDisplay(distances);
+        System.out.println("The max distance is: " + max);
+        System.out.println("Number of tiles in the lake is:" + landTiles);
         //
     }
 
@@ -228,7 +242,7 @@ public class Graph {
             }
 
         }
-        distancesDisplay(distances);
+
         return max;
     }
 
@@ -254,10 +268,12 @@ public class Graph {
     private void distancesDisplay(int[][] distances) {
         for(int i = 0; i < distances.length; i++) {
             for(int j = 0; j < distances[0].length; j++) {
-                if(distances[i][j] == -1 || distances[i][j] > 9) {
+                if(distances[i][j] > 9) {
                     System.out.print(distances[i][j] + " ");
-                } else {
+                } else if(distances[i][j] > -1){
                     System.out.print(" " + distances[i][j] + " ");
+                } else {
+                    System.out.print("   ");
                 }
 
             }
@@ -274,4 +290,5 @@ public class Graph {
             }
         }
     }
+
 }
