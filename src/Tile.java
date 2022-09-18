@@ -20,6 +20,10 @@ public class Tile {
         this.land = !land;
     }
 
+    public void setWater() {
+        this.land = false;
+    }
+
     public boolean isLand() {
         return land;
     }
