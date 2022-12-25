@@ -9,8 +9,7 @@ public class Main {
         System.out.println("The row length is " + graph.getRow());
 
         graph.view();
-        graph.random();
-        graph.view();
+
         graph.solve();
         /*
         graph.reset();

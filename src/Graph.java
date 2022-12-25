@@ -89,7 +89,7 @@ public class Graph {
     public void reset() {
         for(int i = 0; i < row; i++) {
             for(int j = 0; j < col; j++) {
-                if(lake[i][j].isLand()) {
+                if(lake[i][j].isLand() || lake[i][j].isEntrance()) {
                     lake[i][j].setWater();
                 }
             }
@@ -160,12 +160,10 @@ public class Graph {
     }
 
 
-    //Solve applies an optimized arrangement of pathing of tiles
-    //We allow at most 2 swap tiles. It can be assumed the player will
-    //place the entrance at the most optimal location.
-    public void solve() {
+    //Solve finds the longest given path of the current arrangement of tiles
+    public int[][] solve() {
         if(!initialized) {
-            return;
+            return null;
         }
         int[][] distances = new int[this.row][this.col];
         int entRow = 0;
@@ -210,6 +208,7 @@ public class Graph {
         System.out.println("The max distance is: " + max);
         System.out.println("Number of tiles in the lake is:" + landTiles);
         //
+        return distances;
     }
 
     //Calculates the distance of all tiles from entrance.
@@ -290,5 +289,6 @@ public class Graph {
             }
         }
     }
+
 
 }

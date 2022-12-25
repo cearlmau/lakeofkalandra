@@ -28,4 +28,7 @@ public class Tile {
         return land;
     }
 
+    public boolean isWater() {
+        return !land;
+    }
 }
